@@ -38,29 +38,29 @@ if (!isset($_SESSION['jwt'])) {
             <div class="card">
                 <div class="card-header">Add Listing</div>
                 <div class="card-body">
-                    <form id="add_listing_form" method="POST">
-                        <div class="form-group">
-                            <label for="title">Title:</label>
-                            <input type="text" class="form-control" id="title" name="title" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="description">Description:</label>
-                            <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="image">Image URL:</label>
-                            <input type="text" class="form-control" id="image" name="image">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email:</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="phoneNumber">Phone Number:</label>
-                            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" pattern="[0-9]{10}" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary" name="add_listing">Add Listing</button>
-                    </form>
+                <form id="add_listing_form" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="image">Image:</label>
+                    <input type="file" class="form-control-file" id="imageFile" name="imageFile" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number:</label>
+                    <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" pattern="[0-9]{10}" required>
+                </div>
+                <button type="submit" class="btn btn-primary" name="add_listing">Add Listing</button>
+            </form>
                 </div>
             </div>
             <br />
@@ -74,13 +74,15 @@ if (!isset($_SESSION['jwt'])) {
     $(document).ready(function() {
         $('#add_listing_form').submit(function(event) {
             event.preventDefault(); 
-            var formData = $(this).serialize(); // Serialize form data
+            var formData = new FormData($(this)[0]); 
 
             // Send AJAX request
             $.ajax({
                 url: '/tasks/authentication/add_listing_ajax.php', 
                 type: 'POST',
                 data: formData,
+                processData: false,  
+                contentType: false,  
                 success: function(response) {
                     // Handle success response
                     console.log(response);
@@ -89,9 +91,7 @@ if (!isset($_SESSION['jwt'])) {
                     window.location.href = "home.php";
                 },
                 error: function(xhr, status, error) {
-                    
                     console.error(xhr.responseText);
-                    
                 }
             });
         });

@@ -67,35 +67,37 @@ $listings = $listingController->getAllListings(); // Assuming you have a method 
                 <div class="card-header">My Listings</div>
                 <div class="card-body">
                     <div class="list-group">
-                        <?php foreach ($listings as $listing): ?>
-                            <div class="list-group-item">
-                                <div class="row">
-                                    <div class="col">
-                                        
-                                        <h5 class="mb-1"><?= $listing->getTitle() ?></h5>
-                                        <p class="mb-1"><?= $listing->getDescription() ?></p>
-                                        <p class="mb-1">Listing By: <?= $listing->getEmail() ?></p>
-                                        <p class="mb-1">Contact: <?= $listing->getPhoneNumber() ?></p>
-                                    </div>
-                                    <div class="col-auto">
-                                        <img src="<?= $listing->getImage() ?>" class="img-thumbnail" alt="Listing Image">
-                                    </div>
-                                    <div class="col-auto">
-                                        <!-- Edit and delete buttons -->
-                                        <?php 
-                                        // Generate the URL parameter with ID
-                                        $listingId = $listing->getId();
-                                        ?>
-                                        <a href="edit_listing/<?= $listing->getId() ?>" class="btn btn-sm btn-primary mr-2"><i class="fas fa-edit"></i> Edit</a><br/>
-                                        <br />
-                                        <form class="delete-listing-form" method="POST">
-                                            <input type="hidden" name="id" value="<?= $listing->getId() ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger" name="delete_listing" onclick="return confirm('Are you sure you want to delete this listing?')"><i class="fas fa-trash"></i> Delete</button>
-                                        </form>
+                        <?php if (!empty($listings)): ?>
+                            <?php foreach ($listings as $listing): ?>
+                                <div class="list-group-item">
+                                    <div class="row">
+                                        <div class="col">
+                                            <h5 class="mb-1"><?= $listing->getTitle() ?></h5>
+                                            <p class="mb-1"><?= $listing->getDescription() ?></p>
+                                            <p class="mb-1">Listing By: <?= $listing->getEmail() ?></p>
+                                            <p class="mb-1">Contact: <?= $listing->getPhoneNumber() ?></p>
+                                        </div>
+                                        <div class="col-auto">
+                                            <img src="<?= $listing->getImagePath() ?>" class="img-thumbnail" alt="Listing Image">
+                                        </div>
+                                        <div class="col-auto">
+                                            <!-- Edit and delete buttons -->
+                                            <?php 
+                                            // Generate the URL parameter with ID
+                                            $listingId = $listing->getId();
+                                            ?>
+                                            <a href="edit_listing/<?= $listing->getId() ?>" class="btn btn-sm btn-primary mr-2"><i class="fas fa-edit"></i> Edit</a><br/><br/>
+                                            <form class="delete-listing-form" method="POST">
+                                                <input type="hidden" name="id" value="<?= $listing->getId() ?>">
+                                                <button type="submit" class="btn btn-sm btn-danger" name="delete_listing" onclick="return confirm('Are you sure you want to delete this listing?')"><i class="fas fa-trash"></i> Delete</button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        <?php endforeach; ?>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>No listings available.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

@@ -22,13 +22,15 @@ class Database {
 
         try {
             $this->pdo = new PDO($dsn, $this->user, $this->password, $options);
-            // Automatically create the table if it doesn't exist
+            // Automatically create the tables if they don't exist
             $this->createListingTable();
+            $this->createUserTable();
         } catch (PDOException $e) {
             throw new PDOException($e->getMessage(), (int)$e->getCode());
         }
     }
 
+    // Create the "listing" table if it doesn't exist
     // Create the "listing" table if it doesn't exist
     private function createListingTable() {
         $query = "
@@ -36,16 +38,36 @@ class Database {
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `title` VARCHAR(255) NOT NULL,
                 `description` TEXT,
-                `image` VARCHAR(255),
+                `image_path` VARCHAR(255),
                 `email` VARCHAR(255) NOT NULL,
                 `phoneNumber` VARCHAR(20) NOT NULL,
-                `date_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                `user_id` INT NOT NULL,
+                `date_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
             )
         ";
-    
+
         $this->pdo->exec($query);
     }
 
+
+    // Create the "user" table if it doesn't exist
+    private function createUserTable() {
+        $query = "
+            CREATE TABLE IF NOT EXISTS `user` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `username` VARCHAR(255) NOT NULL,
+                `password` VARCHAR(255) NOT NULL,
+                `email` VARCHAR(255) NOT NULL,
+                `address` TEXT,
+                `bio` TEXT,
+                `profile_picture` VARCHAR(255),
+                `date_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ";
+
+        $this->pdo->exec($query);
+    }
 
     // Get the PDO object
     public function getPdo() {

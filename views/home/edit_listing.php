@@ -67,7 +67,7 @@ if (isset($_GET['id'])) {
             <div class="card">
                 <div class="card-header">Edit Listing</div>
                 <div class="card-body">
-                    <form id="edit_listing_form" method="POST">
+                    <form id="edit_listing_form" method="POST" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="title">Title:</label>
                             <input type="text" class="form-control" id="title" name="title" value="<?= $listing->getTitle() ?>" required>
@@ -77,8 +77,8 @@ if (isset($_GET['id'])) {
                             <textarea class="form-control" id="description" name="description" rows="4" required><?= $listing->getDescription() ?></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="image">Image URL:</label>
-                            <input type="text" class="form-control" id="image" name="image" value="<?= $listing->getImage() ?>">
+                            <label for="image">Upload New Image:</label>
+                            <input type="file" class="form-control-file" id="image" name="image" required>
                         </div>
                         <div class="form-group">
                             <label for="email">Email:</label>
@@ -103,13 +103,15 @@ if (isset($_GET['id'])) {
     $(document).ready(function() {
         $('#edit_listing_form').submit(function(event) {
             event.preventDefault(); 
-            var formData = $(this).serialize(); 
+            var formData = new FormData(this); 
 
             // Send AJAX request
             $.ajax({
                 url: '/tasks/authentication/edit_listing_ajax.php',
                 type: 'POST',
                 data: formData,
+                contentType: false,
+                processData: false,
                 success: function(response) {
                     
                     console.log(response);

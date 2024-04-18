@@ -9,8 +9,22 @@ class ListingController {
         $this->db = $db;
     }
 
-    public function addListing($listing) {
-        return $listing->save();
+    public function addListing($title, $description, $email, $phoneNumber, $file) {
+        // Create a new Listing instance
+        $listing = new Listing($this->db->getPdo(), null, $title, $description, $file, $email, $phoneNumber);
+ 
+        if ($file['error'] === UPLOAD_ERR_OK) {
+            // Upload image file
+            if ($listing->uploadImage($file)) {
+                return $listing->save();
+            } else {
+                // Handle image upload error
+                return false;
+            }
+        } else {
+            // Handle file upload error
+            return false;
+        }
     }
 
     public function getListing($id) {
@@ -26,7 +40,7 @@ class ListingController {
         $stmt = $pdo->query("SELECT * FROM listing");
         $listings = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $listings[] = new Listing($pdo, $row['id'], $row['title'], $row['description'], $row['image'], $row['email'], $row['phoneNumber']);
+            $listings[] = new Listing($pdo, $row['id'], $row['title'], $row['description'], $row['image_path'], $row['email'], $row['phoneNumber']);
         }
         return $listings;
     }
@@ -38,8 +52,6 @@ class ListingController {
         }
         return false;
     }
-
-
     
 
     public function deleteListing($id) {
