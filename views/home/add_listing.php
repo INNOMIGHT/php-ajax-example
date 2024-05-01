@@ -20,11 +20,14 @@ if (!isset($_SESSION['jwt'])) {
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-custom">
-    <a class="navbar-brand" href="/tasks/authentication/home.php">Products Listings</a>
+    <a class="navbar-brand" href="/tasks/authentication/listings.php">Products Listing</a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
                 <a class="nav-link" href="add_listing.php"><i class="fas fa-plus"></i> Add Listing</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="myprofile.php"><i class="fas fa-user"></i> My Profile</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/tasks/authentication/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -100,5 +103,8 @@ if (!isset($_SESSION['jwt'])) {
 
 <!-- Bootstrap JS CDN (optional) -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Font Awesome CDN for icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
 </body>
 </html>

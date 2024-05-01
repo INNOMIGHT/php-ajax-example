@@ -16,7 +16,7 @@ require_once dirname(__DIR__, 2) . '/config/database.php';
 $host = 'localhost';
 $user = 'root';
 $password = 'root';
-$dbname = 'task-authentication';
+$dbname = 'user-listings';
 
 $db = new Database($host, $user, $password, $dbname);
 
@@ -28,12 +28,12 @@ if (isset($_GET['id'])) {
     $listing = $listingController->getListing($id);
     if (!$listing) {
         // Redirect to error page or handle appropriately if listing not found
-        header("Location: /tasks/authentication/error.php");
+        header("Location: /tasks/authentication/error.php?error=1");
         exit();
     }
 } else {
     // Redirect to error page or handle appropriately if id parameter not provided
-    header("Location: /tasks/authentication/error.php");
+    header("Location: /tasks/authentication/error.php?error=2");
     exit();
 }
 ?>
@@ -49,11 +49,14 @@ if (isset($_GET['id'])) {
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-custom">
-    <a class="navbar-brand" href="/tasks/authentication/home.php">Products Listing</a>
+    <a class="navbar-brand" href="/tasks/authentication/listings.php">Products Listing</a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
                 <a class="nav-link" href="add_listing.php"><i class="fas fa-plus"></i> Add Listing</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="myprofile.php"><i class="fas fa-user"></i> My Profile</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/tasks/authentication/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -98,6 +101,9 @@ if (isset($_GET['id'])) {
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Font Awesome CDN for icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
 
 <script>
     $(document).ready(function() {

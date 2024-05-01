@@ -2,7 +2,7 @@ RewriteEngine On
 RewriteBase /tasks/authentication/
 
 # Rewrite requests for /home.php to /views/home/home.php
-RewriteRule ^home\.php$ views/home/home.php [L]
+RewriteRule ^listings\.php$ views/home/home.php [L]
 
 # Rewrite requests for /login.php to /views/auth/login.php
 RewriteRule ^login\.php$ views/auth/login.php [L]
@@ -13,4 +13,10 @@ RewriteRule ^register\.php$ views/auth/register.php [L]
 # Rewrite requests for /add_listing.php to /views/home/add_listing.php
 RewriteRule ^add_listing\.php$ views/home/add_listing.php [L]
 
+# Rewrite requests for /listing_details/ID to /views/home/listing_details.php?id=ID
+RewriteRule ^listing_details/([^/]*)$ views/home/listing_details.php?id=$1 [L]
+
 RewriteRule ^edit_listing/([^/]*)$ views/home/edit_listing.php?id=$1 [L]
+
+RewriteRule ^myprofile\.php$ views/home/myprofile.php [L]
+RewriteRule ^change_password\.php$ views/home/change_password.php [L]

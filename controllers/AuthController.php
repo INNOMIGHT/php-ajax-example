@@ -1,10 +1,16 @@
 <?php
 
-require_once 'config/database.php';
-require_once 'models/User.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../models/User.php';
 
-require_once 'vendor/autoload.php'; // Include autoload.php from firebase/php-jwt library
-require_once 'vendor/jwt_helper.php';
+// require_once 'config/database.php';
+// require_once 'models/User.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../jwt_helper.php';
+
+
+// require_once 'vendor/autoload.php'; // Include autoload.php from firebase/php-jwt library
+// require_once 'vendor/jwt_helper.php';
 
 use Firebase\JWT\JWT;
 
@@ -32,7 +38,6 @@ class AuthController {
     }
 
     public function login($username, $password) {
-
         session_start();
         // Validate username and password
         if (empty($username) || empty($password)) {
@@ -43,20 +48,22 @@ class AuthController {
         $user = User::findByUsername($this->db->getPdo(), $username);
         if (!$user) {
             header("Location: /tasks/authentication/login.php?error=1"); // User not found
-            exit();
+            return false;
         }
 
         // Verify password
         if (!password_verify($password, $user->getPassword())) {
             header("Location: /tasks/authentication/login.php?error=1"); // Incorrect password
-            exit();
+            return false;
         }
 
         // User authenticated, generate JWT token
         $jwt = $this->generateJwt($user->getId(), $user->getUsername());
+
         $_SESSION['jwt'] = $jwt;
         header('LOCATION: /tasks/authentication/home.php');
-        exit();
+        return true;
+        
     }
 
     public function generateJwt($userId, $username) {
@@ -64,7 +71,7 @@ class AuthController {
             'user_id' => $userId,
             'username' => $username,
             'iat' => time(), // Issued at time
-            'exp' => time() + (60 * 60) // Expiration time (1 hour)
+            'exp' => time() + (60 * 60 * 24) // Expiration time (1 day)
         ];
         $jwt = JwtHelper::encode($payload);
         return $jwt;
@@ -72,16 +79,17 @@ class AuthController {
 
     public function validateJwt($jwt) {
         try {
-            $decoded = JWT::decode($jwt, $this->jwtSecret, ['HS256']);
-            return $decoded->username;
+            $algorithm = 'HS256';
+            $decoded = JwtHelper::decode($jwt);
+            return $decoded->user_id;
         } catch (Exception $e) {
             return false; // JWT validation failed
         }
     }
 
-    public function register($username, $password, $email, $phoneNumber) {
+    public function register($username, $password, $email, $address, $bio, $profilePhoto) {
         // Validate input data
-        if (empty($username) || empty($password) || empty($email) || empty($phoneNumber)) {
+        if (empty($username) || empty($password) || empty($email)) {
             header("Location: /tasks/authentication/register.php?error=4"); // Empty fields
             exit();
         }
@@ -92,19 +100,13 @@ class AuthController {
             exit();
         }
     
-        // Check phone number format
-        if (!preg_match('/^\d{10}$/', $phoneNumber)) {
-            header("Location: /tasks/authentication/register.php?error=7"); // Invalid phone number format
-            exit();
-        }
-    
         // Check password length and numeric character
-        if (strlen($password) < 6 || !preg_match('/\d/', $password)) {
-            header("Location: /tasks/authentication/register.php?error=8"); // Password must be at least 6 characters long and contain at least one numeric character
+        if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password) || !preg_match('/[^A-Za-z0-9]/', $password)) {
+            header("Location: /tasks/authentication/register.php?error=8"); // Password must be at least 8 characters long and contain at least one letter, one number, and one symbol
             exit();
         }
     
-        // Check if username, email, or phone number already exist
+        // Check if username or email already exist
         if (User::findByUsername($this->db->getPdo(), $username)) {
             header("Location: /tasks/authentication/register.php?error=1"); // Username already exists
             exit();
@@ -113,13 +115,23 @@ class AuthController {
             header("Location: /tasks/authentication/register.php?error=2"); // Email already exists
             exit();
         }
-        if (User::findByPhoneNumber($this->db->getPdo(), $phoneNumber)) {
-            header("Location: /tasks/authentication/register.php?error=3"); // Phone number already exists
-            exit();
-        }
     
         // Create a new User object
-        $user = new User($this->db->getPdo(), $username, $password, $email, $phoneNumber);
+        $user = new User($this->db->getPdo(), $username, $password, $email, $address, $bio, $profilePhoto);
+        
+        if ($profilePhoto['error'] === UPLOAD_ERR_OK) {
+
+            // Upload image file
+            if ($user->uploadImage($profilePhoto)) {
+                return $user->save();
+            } else {
+                // Handle image upload error
+                return false;
+            }
+        } else {
+            // Handle file upload error
+            return false;
+        }
     
         // Save the user to the database
         if ($user->save()) {
@@ -130,7 +142,28 @@ class AuthController {
             exit();
         }
     }
+
+    public function findUserById($id){
+        $user = User::findById($this->db->getPdo(), $id);
+        return $user;
+    }
     
+    public function changePassword($userId, $newPassword) {
+        try {
+            // Hash the new password before saving it
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    
+            // Update the user's password in the database
+            $stmt = $this->db->getPdo()->prepare("UPDATE `user` SET password = ? WHERE id = ?");
+            $stmt->execute([$hashedPassword, $userId]);
+    
+            return true;
+        } catch (PDOException $e) {
+            // Log or handle the error appropriately
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
 
     public function logout() {
         session_start();
@@ -140,3 +173,4 @@ class AuthController {
         exit();
     }
 }
+?>

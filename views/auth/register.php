@@ -28,7 +28,9 @@ if ($error === '1') {
 } elseif ($error === '7') {
     $errorMsg = 'Invalid phone number format. Please enter a 10-digit numeric phone number.';
 } elseif ($error === '8') {
-    $errorMsg = 'Password must be at least 6 characters long and contain at least one numeric character.';
+    $errorMsg = 'Password must be at least 6 characters long and contain at least one numeric and symbolic character.';
+} elseif ($error === '9') {
+    $errorMsg = 'Image must be under 2 mb and square (same length and breadth).';
 }
 ?>
 
@@ -53,22 +55,37 @@ if ($error === '1') {
                                 <?php echo $errorMsg; ?>
                             </div>
                         <?php endif; ?>
-                        <form action="/tasks/authentication/index.php" method="post">
+                        <form id="register-form" method="post">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                            <span id="username-error" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <span id="password-error" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <span id="email-error" class="text-danger"></span>
+                        </div>
+                            
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <input type="text" class="form-control" id="address" name="address">
+                            <span id="address-error" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="3"></textarea>
+                            <span id="bio-error" class="text-danger"></span>
+                        </div>
                             <div class="form-group">
-                                <label for="username">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                                <label for="profilePhoto">Profile Photo</label>
+                                <input type="file" class="form-control-file" id="profilePhoto" name="profilePhoto" required>
+                                <span id="profilePhoto-error" class="text-danger"></span>
                             </div>
                             <button type="submit" name="register" class="btn btn-primary">Register</button>
                         </form>
@@ -79,8 +96,56 @@ if ($error === '1') {
         </div>
     </div>
     <!-- Bootstrap JS CDN (optional) -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+   $(document).ready(function() {
+    $('#register-form').submit(function(event) {
+        event.preventDefault(); 
+        var formData = new FormData($(this)[0]); 
+
+        // Send AJAX request for validation
+        $.ajax({
+            url: '/tasks/authentication/register_validation.php', 
+            type: 'POST',
+            data: formData,
+            processData: false,  
+            contentType: false,  
+            success: function(response) {
+                // Handle validation results
+                var errors = JSON.parse(response).errors;
+                if (Object.keys(errors).length > 0) {
+                    // Display validation errors
+                    $.each(errors, function(key, value) {
+                        $('#' + key + '-error').text(value);
+                    });
+                } else {
+                    // If no validation errors, proceed with form submission
+                    $.ajax({
+                        url: '/tasks/authentication/register_handler.php',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            // Handle success response
+                            console.log(response);
+                            window.location.href = "login.php?registered=1";
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+});
+
+</script>
 </body>
 </html>

@@ -1,4 +1,15 @@
 <?php
+
+// Require the ListingController using __DIR__
+require_once dirname(__DIR__, 2) . '/controllers/ListingController.php';
+require_once dirname(__DIR__, 2) . '/controllers/AuthController.php';
+
+require_once dirname(__DIR__, 2) . '/config/database.php';
+
+require_once dirname(__DIR__, 2) . '/jwt_helper.php';
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 session_start();
 
 // Check if the user is logged in
@@ -8,22 +19,31 @@ if (!isset($_SESSION['jwt'])) {
     exit();
 }
 
-// Require the ListingController using __DIR__
-require_once dirname(__DIR__, 2) . '/controllers/ListingController.php';
-require_once dirname(__DIR__, 2) . '/config/database.php';
+
 
 // Initialize the Database connection
 $host = 'localhost';
 $user = 'root';
 $password = 'root';
-$dbname = 'task-authentication';
+$dbname = 'user-listings';
 
 $db = new Database($host, $user, $password, $dbname);
 
 $listingController = new ListingController($db); // Initialize ListingController
+$authController = new AuthController($db);
+
+$jwt = $_SESSION['jwt'];
+
+// Decode JWT to retrieve user ID
+$decoded = JwtHelper::decode($jwt);
+// $user_id = $authController->validateJwt($jwt);
+$user_id = $decoded->user_id;
+$user = $authController->findUserById($user_id);
 
 // Fetch the listings from the database using the ListingController
-$listings = $listingController->getAllListings(); // Assuming you have a method to fetch all listings
+$listings = $listingController->getAllListings($user_id); // Assuming you have a method to fetch all listings
+
+
 
 ?>
 
@@ -48,11 +68,14 @@ $listings = $listingController->getAllListings(); // Assuming you have a method 
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-custom">
-    <a class="navbar-brand" href="/tasks/authentication/home.php">Products Listing</a>
+    <a class="navbar-brand" href="/tasks/authentication/listings.php">Products Listing</a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
                 <a class="nav-link" href="add_listing.php"><i class="fas fa-plus"></i> Add Listing</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="myprofile.php"><i class="fas fa-user"></i> My Profile</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/tasks/authentication/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -72,9 +95,11 @@ $listings = $listingController->getAllListings(); // Assuming you have a method 
                                 <div class="list-group-item">
                                     <div class="row">
                                         <div class="col">
+                                        <a href="/tasks/authentication/listing_details/<?= $listing->getId() ?>">
                                             <h5 class="mb-1"><?= $listing->getTitle() ?></h5>
+                            </a>
                                             <p class="mb-1"><?= $listing->getDescription() ?></p>
-                                            <p class="mb-1">Listing By: <?= $listing->getEmail() ?></p>
+                                            <p class="mb-1">Listing By: <a href="myprofile.php"><?= $user->getUsername() ?></a></p>
                                             <p class="mb-1">Contact: <?= $listing->getPhoneNumber() ?></p>
                                         </div>
                                         <div class="col-auto">

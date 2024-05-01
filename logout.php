@@ -7,7 +7,7 @@ require_once 'config/database.php';
 $host = 'localhost';
 $user = 'root';
 $password = 'root';
-$dbname = 'task-authentication';
+$dbname = 'user-listings';
 
 $db = new Database($host, $user, $password, $dbname);
 

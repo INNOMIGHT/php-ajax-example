@@ -2,15 +2,20 @@
 
 require_once 'config/database.php';
 require_once 'controllers/ListingController.php';
+require_once 'jwt_helper.php';
+
 
 // Initialize the Database connection
 $host = 'localhost';
 $user = 'root';
 $password = 'root';
-$dbname = 'task-authentication';
+$dbname = 'user-listings';
+
 
 $db = new Database($host, $user, $password, $dbname);
 $listingController = new ListingController($db); 
+
+session_Start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if the edit_listing parameter is set
@@ -34,8 +39,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo $_FILES['image']['error'];
             
         }
+        $jwt = $_SESSION['jwt'];
+        $decoded = JwtHelper::decode($jwt);
+        $user_id = $decoded->user_id;
 
-        $success = $listingController->editListing($id, $title, $description, $image, $email, $phoneNumber);
+
+        $success = $listingController->editListing($id, $title, $description, $image, $email, $phoneNumber, $user_id);
 
         if ($success) {
             echo "Listing edited successfully!";

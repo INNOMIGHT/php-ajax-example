@@ -9,7 +9,7 @@ require_once 'models/Listing.php';
 $host = 'localhost';
 $user = 'root';
 $password = 'root';
-$dbname = 'task-authentication';
+$dbname = 'user-listings';
 
 $db = new Database($host, $user, $password, $dbname);
 
